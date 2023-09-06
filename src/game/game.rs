@@ -101,6 +101,7 @@ impl Game {
                 Some(card) => {
                     self.call_team = Some(self.players[i].team);
                     self.trump = Some(card);
+                    return;
                 },
                 None => {},
             } 
@@ -110,6 +111,7 @@ impl Game {
             Some(card) => {
                 self.call_team = Some(self.players[0].team);
                 self.trump = Some(card);
+                return;
             },
             None => { panic!("Invalid Input - dealer cannot pass"); },
         }
@@ -163,13 +165,19 @@ impl Game {
     }
 
     fn play_hand(&mut self, hands: &mut Score) -> &Player {
-        for player in &mut self.players {
+        for i in 1..N_PLAYERS {
             if self.prev_cards.len() == 0 {
-                self.prev_cards.push(player.play_turn(None, self.trump.as_ref().unwrap()));
+                self.prev_cards.push(self.players[i].play_turn(None, self.trump.as_ref().unwrap()));
             }
             else {
-                self.prev_cards.push(player.play_turn(Some(&self.prev_cards), self.trump.as_ref().unwrap()));
+                self.prev_cards.push(self.players[i].play_turn(Some(&self.prev_cards), self.trump.as_ref().unwrap()));
             }
+        }
+        if self.prev_cards.len() == 0 {
+            self.prev_cards.push(self.players[0].play_turn(None, self.trump.as_ref().unwrap()));
+        }
+        else {
+            self.prev_cards.push(self.players[0].play_turn(Some(&self.prev_cards), self.trump.as_ref().unwrap()));
         }
 
         let mut highest_card_pos: usize = 0;

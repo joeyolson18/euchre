@@ -1,7 +1,8 @@
 // Player Options
+// 'c' - play a card
 // 'o' - order up card displayed to dealer
 // 'd' - order up card to self (dealer)
-// 'c' - call up trump suit
+// 't' - call up trump suit
 
 use super::{ Card, Replace };
 use super::{ read_input };
@@ -96,7 +97,7 @@ impl Player {
 
     pub fn call_suit(&mut self, suit_options: Vec<String>) -> Option<Card> {
 
-        self.print_options('c', &suit_options);
+        self.print_options('t', &suit_options);
         let input = read_input();
 
         match input {
@@ -140,7 +141,7 @@ impl Player {
                     if card.suit == lead_suit 
                     || (card.value == 'J' && card.color == lead_color) {
                         playable_cards.push(card_pos);
-                        if !shortsuited { shortsuited = true; }
+                        if shortsuited { shortsuited = false; }
                     } 
                 }
                 if shortsuited { 
@@ -155,12 +156,22 @@ impl Player {
                 }
             }
         }
-        // TODO allow player input on played card
-        let played_card_index = playable_cards[0];
-        self.hand.remove(played_card_index)
+        let card_options = playable_cards.iter().map(|&card_pos|
+            self.hand[card_pos].return_option()
+        ).collect();
+        self.print_options('c', &card_options);
+        let input = read_input();
+        let played_card_index = match input {
+            Ok(i) => {
+                if i < self.hand.len() { playable_cards[i] }
+                else { panic!("Invalid Input for fn play_turn"); }
+            }
+            Err(e) => { panic!("{}", e); },
+        };
+        return self.hand.remove(played_card_index);
     }   
 
-    pub fn print_options(&self, option_type: char, display: &Vec<String>) {
+    pub fn print_options(&self, option_type: char, options: &Vec<String>) {
         let mut output = String::new();
         for card in &self.hand {
             output += &card.return_option();
@@ -170,7 +181,7 @@ impl Player {
         output += &self.position.to_string();
         output.push(option_type);
         output.push('\n');
-        for (i, option) in display.iter().enumerate() { 
+        for (i, option) in options.iter().enumerate() { 
             output += &i.to_string();
             output.push('|');
             output += option;
