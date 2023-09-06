@@ -3,7 +3,9 @@ use super::Card;
 use super::N_CARDS;
 
 pub struct Deck {
-    pub cards: Vec<Card>
+    pub cards: Vec<Card>,
+    suits: [char; 4],
+    values: [char; 6],
 }
 
 impl Deck {
@@ -19,7 +21,7 @@ impl Deck {
                 cards.push(Card{ value, suit, color });
             }
         }
-        Deck { cards }
+        Deck { cards, suits, values }
     }
 
     pub fn shuffle(&mut self) {
@@ -37,5 +39,21 @@ impl Deck {
             hand.push(self.cards.pop().unwrap());
         }
         return hand;
+    }
+
+    pub fn last(&self) -> &Card {
+        return &self.cards[self.cards.len() - 1];
+    }
+    pub fn push(&mut self, card: Card) {
+        self.cards.push(card);
+    }
+    pub fn pop(&mut self) -> Card {
+        return self.cards.pop().unwrap();
+    }
+    pub fn get_suits(&self) -> [char; 4] {
+        return self.suits;
+    }
+    pub fn get_values(&self) -> [char; 6] {
+        return self.values;
     }
 }

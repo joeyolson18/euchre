@@ -1,11 +1,12 @@
-use std::{fmt, collections::VecDeque};
-use super::{ Card, Player, Deck };
+use std::{ fmt, collections::VecDeque };
+use super::{ Card, Player, Deck, Replace };
 use super::{ Score };
 use super::{ HAND_SIZE, N_PLAYERS };
 
 pub struct Game {
     deck: Deck,
     players: VecDeque<Player>,
+    call_team: Option<usize>,
     prev_cards: Vec<Card>,
     discard: Vec<Card>,
     trump: Option<Card>,
@@ -21,27 +22,28 @@ impl Game {
         Game {
             deck: Deck::new(),
             players: players,
+            call_team: None,
             prev_cards: Vec::new(),
             trump: None,
             discard: Vec::new(),
         }
     }
 
-    pub fn play_game(&mut self) -> usize {
+    pub fn play_game(mut self) -> usize {
         let mut score: Score = [0, 0];
         let mut dealer_position: usize = 0;
         loop {
-
             self.deck.shuffle();
 
             for i in 0..N_PLAYERS {
                 self.players[i].deal_hand(self.deck.get_cards(HAND_SIZE));
             }
-            self.trump = Some(self.deck.cards[0].clone());
+
+            self.bid();
 
             print!("{}", self);
 
-            self.play_round(dealer_position, &mut score);
+            self.play_round(&mut score);
 
             print!("CURRENT SCORE: {} | {}\n\n", score[0], score[1]);
 
@@ -57,8 +59,51 @@ impl Game {
         }
     }
 
-    fn play_round(&mut self, dealer_position: usize, score: &mut Score) {
-        let mut first_player_position = dealer_position;
+    fn bid(&mut self) {
+
+        // Bid with order card
+        let bid_card = self.deck.pop();
+        for i in 1..N_PLAYERS {
+            let order_up = self.players[i].bid(&bid_card);
+            if order_up {
+                self.call_team = Some(self.players[i].team);
+                self.trump = Some(bid_card.clone());
+                let replaced_card = self.players[0].replace(bid_card);
+                self.deck.push(replaced_card);
+                return;
+            }
+        let dealer_bid = self.players[0].bid_dealer(bid_card);
+        match dealer_bid {
+            Replace::Yes(replaced_card) => {
+                self.call_team = Some(self.players[0].team);
+                self.trump = Some(bid_card.clone());
+                self.deck.push(replaced_card);
+                return;
+            },
+            Replace::No(bid_card) => {
+                self.deck.push(bid_card);
+            },
+        }
+
+        // // Bid with order card turned
+        // let nullified_suit = self.deck.last().suit;
+        // let mut suit_options: Vec<String> = self.deck.get_suits().into_iter()
+        //     .filter(|&suit| 
+        //         suit != nullified_suit
+        //     ).map(|suit| 
+        //         suit.to_string()
+        //     ).collect();
+        // suit_options.push('P');
+        // for i in 1..N_PLAYERS {
+        //     let order_up = 
+        // }
+
+            
+        }
+    }
+
+    fn play_round(&mut self, score: &mut Score) {
+        let mut first_player_position = self.players[0].position;
         let mut hands: Score = [0, 0];
         for _i in 0..HAND_SIZE {
             
@@ -136,8 +181,14 @@ impl Game {
 
 impl fmt::Display for Game {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut output = String::new();
-        output += Card::print_card(&self.trump.as_ref().unwrap()).as_str();
+        let mut output = String::from("┌──┐");
+        output += "Calling Team: ";
+        output += &self.call_team.unwrap().to_string();
+        output.push('\n');
+        output.push('│');
+        output.push(self.trump.as_ref().unwrap().value);
+        output.push(self.trump.as_ref().unwrap().suit);
+        output += "│\n└──┘\n";
 
         for player in &self.players {
             output += Card::print_cards(&player.hand, player.position).as_str();

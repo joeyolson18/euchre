@@ -1,6 +1,8 @@
+use std::fmt::Display;
+
 use super::N_PLAYERS;
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Card {
     pub value: char,
     pub suit: char,
@@ -34,6 +36,12 @@ impl Card {
         }  
     }
 
+    pub fn return_option(&self) -> String {
+        let mut output = String::from(self.value.clone());
+        output.push(self.suit.clone());
+        return output;
+    }
+
     pub fn print_cards(cards: &Vec<Card>, player_index: usize) -> String {
         let mut output = String::new();
         output += "Player ";
@@ -56,15 +64,6 @@ impl Card {
         output.push('\n');
     
         return output;
-    }
-
-    pub fn print_card(card: &Card) -> String {
-        let mut output = String::from("┌──┐\n");
-        output.push('│');
-        output.push(card.value);
-        output.push(card.suit);
-        output += "│\n└──┘\n";
-        return output; 
     }
 
     pub fn print_hand(cards: &Vec<Card>, lead_player_index: usize, winner_index: usize, hands: &[usize; 2]) -> String {
