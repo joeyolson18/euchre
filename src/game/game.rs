@@ -72,6 +72,7 @@ impl Game {
                 self.deck.push(replaced_card);
                 return;
             }
+        }
         let dealer_bid = self.players[0].bid_dealer(bid_card);
         match dealer_bid {
             Replace::Yes(replaced_card) => {
@@ -85,20 +86,32 @@ impl Game {
             },
         }
 
-        // // Bid with order card turned
-        // let nullified_suit = self.deck.last().suit;
-        // let mut suit_options: Vec<String> = self.deck.get_suits().into_iter()
-        //     .filter(|&suit| 
-        //         suit != nullified_suit
-        //     ).map(|suit| 
-        //         suit.to_string()
-        //     ).collect();
-        // suit_options.push('P');
-        // for i in 1..N_PLAYERS {
-        //     let order_up = 
-        // }
-
-            
+        // Bid with order card turned
+        let nullified_suit = self.deck.last().suit;
+        let mut suit_options: Vec<String> = self.deck.get_suits().into_iter()
+            .filter(|&suit| 
+                suit != nullified_suit
+            ).map(|suit| 
+                suit.to_string()
+            ).collect();
+        suit_options.push('P'.to_string());
+        for i in 1..N_PLAYERS {
+            let called_suit = self.players[i].call_suit(suit_options.clone());
+            match called_suit {
+                Some(card) => {
+                    self.call_team = Some(self.players[i].team);
+                    self.trump = Some(card);
+                },
+                None => {},
+            } 
+        }
+        let called_suit = self.players[0].call_suit(suit_options);
+        match called_suit {
+            Some(card) => {
+                self.call_team = Some(self.players[0].team);
+                self.trump = Some(card);
+            },
+            None => { panic!("Invalid Input - dealer cannot pass"); },
         }
     }
 
@@ -139,10 +152,13 @@ impl Game {
             score[1] += 2;
         }
         else if hands[0] > hands[1] {
-            score[0] += 1;
+            if self.call_team == Some(0) { score[0] += 1; }
+            else { score[0] += 2; }
         }
         else {
-            score[1] += 1;
+            if self.call_team == Some(1) { score[1] += 1; }
+            else { score[1] += 2; }
+            
         }
     }
 

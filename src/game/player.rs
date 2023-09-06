@@ -1,3 +1,8 @@
+// Player Options
+// 'o' - order up card displayed to dealer
+// 'd' - order up card to self (dealer)
+// 'c' - call up trump suit
+
 use super::{ Card, Replace };
 use super::{ read_input };
 
@@ -24,7 +29,7 @@ impl Player {
 
     pub fn bid(&self, bid_card: &Card) -> bool {
         let bid_card_options = vec![bid_card.return_option(), 'P'.to_string()];
-        self.print_options('o', bid_card_options);
+        self.print_options('o', &bid_card_options);
         let input = read_input();
 
         match input {
@@ -45,7 +50,7 @@ impl Player {
             card.return_option() + " " + &bid_card_options
         ).collect();
         replace_options.push('P'.to_string());
-        self.print_options('d', replace_options);
+        self.print_options('d', &replace_options);
         let input = read_input();
 
         match input {
@@ -70,7 +75,7 @@ impl Player {
         let replace_options = self.hand.iter().map(|card| 
                 card.return_option() + " " + &ordered_card_option
             ).collect();
-        self.print_options('r', replace_options);
+        self.print_options('r', &replace_options);
         let input = read_input();
 
         match input {
@@ -87,7 +92,32 @@ impl Player {
             },
             Err(e) => { panic!("{}", e); },
         }
+    }
 
+    pub fn call_suit(&mut self, suit_options: Vec<String>) -> Option<Card> {
+
+        self.print_options('c', &suit_options);
+        let input = read_input();
+
+        match input {
+            Ok(i) => {
+                match i {
+                    0..=2 => {
+                        let suit_chars: Vec<char> = suit_options[i].chars().collect();
+                        let suit = suit_chars[0];
+                        return Some(Card{
+                            value: ' ',
+                            suit,
+                            color: if suit == '♣' || suit == '♠' { 'b' }
+                            else { 'r' }
+                        })
+                    },
+                    3 => { return None; },
+                    _ => { panic!("Invalid Input for fn call_suit"); },
+                }
+            },
+            Err(e) => { panic!("{}", e); },
+        }
     }
 
     pub fn play_turn(&mut self, prev_cards: Option<&Vec<Card>>, trump: &Card) -> Card {
@@ -130,7 +160,7 @@ impl Player {
         self.hand.remove(played_card_index)
     }   
 
-    pub fn print_options(&self, option_type: char, display: Vec<String>) {
+    pub fn print_options(&self, option_type: char, display: &Vec<String>) {
         let mut output = String::new();
         for card in &self.hand {
             output += &card.return_option();
