@@ -3,8 +3,7 @@ mod game;
 use game::Game;
 
 fn main() {
-    let mut game = Game::new();
-    game.play_game();
+    Game::new().play_game();
 }
 
 #[derive(Debug, Clone)]

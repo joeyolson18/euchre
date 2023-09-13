@@ -5,7 +5,6 @@ use super::N_CARDS;
 pub struct Deck {
     pub cards: Vec<Card>,
     suits: [char; 4],
-    values: [char; 6],
 }
 
 impl Deck {
@@ -21,7 +20,7 @@ impl Deck {
                 cards.push(Card{ value, suit, color });
             }
         }
-        Deck { cards, suits, values }
+        Deck { cards, suits }
     }
 
     pub fn shuffle(&mut self) {
@@ -52,8 +51,5 @@ impl Deck {
     }
     pub fn get_suits(&self) -> [char; 4] {
         return self.suits;
-    }
-    pub fn get_values(&self) -> [char; 6] {
-        return self.values;
     }
 }

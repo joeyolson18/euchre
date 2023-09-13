@@ -1,7 +1,3 @@
-use std::fmt::Display;
-
-use super::N_PLAYERS;
-
 #[derive(Clone, Copy)]
 pub struct Card {
     pub value: char,
@@ -42,7 +38,16 @@ impl Card {
         return output;
     }
 
-    pub fn print_cards(cards: &Vec<Card>, player_index: usize) -> String {
+    pub fn print_cards(cards: &Vec<Card>) -> String {
+        let mut output = String::new();
+        for card in cards {
+            output += &card.return_option();
+            output.push(' ');
+        }
+        return output;
+    }
+
+    pub fn print_cards_index(cards: &Vec<Card>, player_index: usize) -> String {
         let mut output = String::new();
         output += "Player ";
         output += &player_index.to_string();
@@ -64,53 +69,6 @@ impl Card {
         output.push('\n');
     
         return output;
-    }
-
-    pub fn print_hand(cards: &Vec<Card>, lead_player_index: usize, winner_index: usize, hands: &[usize; 2]) -> String {
-        let lead_player = lead_player_index;
-        let mut output = String::new();
-
-        for i in lead_player..N_PLAYERS {
-            output += &i.to_string();
-            output += "┌──┐ ";
-        }
-        for i in 0..lead_player {
-            output += &i.to_string();
-            output += "┌──┐ ";
-        }
-        output += "Winner: Player ";
-        output += &winner_index.to_string();
-        output.push('\n');
-        for card in cards {
-            output += " │";
-            output.push(card.value);
-            output.push(card.suit);
-            output += "│ ";
-        }
-        output += "Hands:  ";
-        output += &hands[0].to_string();
-        output += " | ";
-        output += &hands[1].to_string();
-        output.push('\n');
-        for _card in cards {
-            output += " └──┘ ";
-        }
-        output.push('\n');
-
-        return output;
-    }
-
-    pub fn print_card_and_rank(card: &Card, trump: &Card, lead_suit: char) -> String {
-        let mut output = String::new();
-        let rank = card.return_rank(trump, lead_suit);
-        output += rank.to_string().as_str() ;
-        output.push('\n');
-        output += "┌──┐\n";
-        output.push('│');
-        output.push(card.value);
-        output.push(card.suit);
-        output += "│\n└──┘\n";
-        return output; 
     }
 }
 

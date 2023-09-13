@@ -1,4 +1,3 @@
-use std::fmt::Display;
 use std::io::{self, BufRead};
 
 const N_CARDS: usize = 24;
@@ -19,9 +18,16 @@ mod player;
 pub use self::card::Card;
 mod card;
 
-pub enum Replace<T> {
-    Yes(T),
-    No(T),
+pub enum Call<Card> {
+    Yes(Card),
+    Alone(Card),
+    No,
+}
+
+pub enum Replace<Card> {
+    Yes(Card),
+    Alone(Card),
+    No(Card),
 }
 
 fn read_input() -> io::Result<usize> {
